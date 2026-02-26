@@ -1,0 +1,3 @@
+data_ingestion:
+  bucket_name: comment-sentiment-dvc-storage
+  file_key: raw_data/twitter_training.csv
