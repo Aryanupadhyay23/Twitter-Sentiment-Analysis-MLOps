@@ -1,0 +1,5 @@
+outs:
+- md5: 93b325080d2c8375dd28637a2c1d9de4
+  size: 10325088
+  hash: md5
+  path: twitter_training.csv
