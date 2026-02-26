@@ -1,3 +1,10 @@
 data_ingestion:
   bucket_name: comment-sentiment-dvc-storage
   file_key: raw_data/twitter_training.csv
+data_validation:
+  required_columns:
+    - text
+    - sentiment
+  label_column: sentiment
+  text_column: text
+  missing_threshold: 0.05

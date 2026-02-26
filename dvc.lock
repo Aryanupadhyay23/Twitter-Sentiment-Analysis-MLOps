@@ -1,0 +1,38 @@
+schema: '2.0'
+stages:
+  data_ingestion:
+    cmd: python src/data/data_ingestion.py
+    deps:
+    - path: params.yaml
+      hash: md5
+      md5: 67032d099fa191617e4246148295c4a3
+      size: 247
+    - path: src/data/data_ingestion.py
+      hash: md5
+      md5: cef56429eac017b49caabebb251807d9
+      size: 2544
+    outs:
+    - path: data/raw/twitter_training.csv
+      hash: md5
+      md5: 853bd20f40d21eb4bbb507fcabcffcd0
+      size: 9325165
+  data_validation:
+    cmd: python src/data/data_validation.py
+    deps:
+    - path: data/raw/twitter_training.csv
+      hash: md5
+      md5: 853bd20f40d21eb4bbb507fcabcffcd0
+      size: 9325165
+    - path: params.yaml
+      hash: md5
+      md5: 67032d099fa191617e4246148295c4a3
+      size: 247
+    - path: src/data/data_validation.py
+      hash: md5
+      md5: 043f338302b10d700ab1d775afc77d96
+      size: 3821
+    outs:
+    - path: reports/validation_report.json
+      hash: md5
+      md5: a9d60c42e51fc437ac28d06004e0ea2f
+      size: 556

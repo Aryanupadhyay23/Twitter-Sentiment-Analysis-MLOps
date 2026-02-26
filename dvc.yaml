@@ -3,7 +3,15 @@ stages:
     cmd: python src/data/data_ingestion.py
     deps:
       - src/data/data_ingestion.py
-    params:
-      - data_ingestion.test_size
+      - params.yaml
     outs:
-      - data/raw
+      - data/raw/twitter_training.csv
+
+  data_validation:
+    cmd: python src/data/data_validation.py
+    deps:
+      - src/data/data_validation.py
+      - data/raw/twitter_training.csv
+      - params.yaml
+    outs:
+      - reports/validation_report.json
