@@ -1,77 +1,53 @@
 # Python
-
 __pycache__/
 *.py[cod]
 *.so
 
-# Virtual Environment
-
+# Virtual environment
 myenv/
 env/
 .venv/
 
-# =========================
-# Data (DVC managed)
-# =========================
+# Data managed by DVC
 data/
 
-# =========================
-# Model artifacts (DVC)
-# =========================
+# Model artifacts
 models/artifacts/
 
-# =========================
 # Serialized ML files
-# =========================
 *.pkl
 *.joblib
 
-# =========================
 # Logs
-# =========================
 *.log
 errors.log
 
-# =========================
 # Environment variables
-# =========================
 .env
 
-# =========================
-# IDEs
-# =========================
+# IDE files
 .vscode/
 .idea/
 .spyproject/
 
-# =========================
-# Jupyter
-# =========================
+# Jupyter checkpoints
 .ipynb_checkpoints/
 
-# =========================
 # OS files
-# =========================
 .DS_Store
 
-# =========================
-# Build / packaging
-# =========================
+# Build and packaging
 build/
 dist/
 *.egg-info/
 .eggs/
 
-# =========================
-# Coverage / testing
-# =========================
+# Coverage and testing
 .coverage
 .coverage.*
 .cache
 htmlcov/
 .tox/
 
-# =========================
-# Docs build
-# =========================
+# Documentation build
 docs/_build/
