@@ -15,3 +15,21 @@ stages:
       - params.yaml
     outs:
       - reports/validation_report.json
+
+  data_cleaning:
+    cmd: python src/data/data_cleaning.py
+    deps:
+      - src/data/data_cleaning.py
+      - data/raw/twitter_training.csv
+    outs:
+      - data/interim/cleaned_data.csv
+  
+  data_preprocessing:
+    cmd: python src/data/data_preprocessing.py
+    deps:
+      - src/data/data_preprocessing.py
+      - data/interim/cleaned_data.csv
+      - params.yaml
+    outs:
+      - data/processed
+      - models/artifacts

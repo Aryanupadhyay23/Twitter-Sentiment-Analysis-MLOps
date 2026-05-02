@@ -5,8 +5,8 @@ stages:
     deps:
     - path: params.yaml
       hash: md5
-      md5: 67032d099fa191617e4246148295c4a3
-      size: 247
+      md5: eb50ae69dc2eedc31abb2c7072ebea6c
+      size: 385
     - path: src/data/data_ingestion.py
       hash: md5
       md5: cef56429eac017b49caabebb251807d9
@@ -25,8 +25,8 @@ stages:
       size: 9325165
     - path: params.yaml
       hash: md5
-      md5: 67032d099fa191617e4246148295c4a3
-      size: 247
+      md5: eb50ae69dc2eedc31abb2c7072ebea6c
+      size: 385
     - path: src/data/data_validation.py
       hash: md5
       md5: 043f338302b10d700ab1d775afc77d96
@@ -36,3 +36,45 @@ stages:
       hash: md5
       md5: a9d60c42e51fc437ac28d06004e0ea2f
       size: 556
+  data_cleaning:
+    cmd: python src/data/data_cleaning.py
+    deps:
+    - path: data/raw/twitter_training.csv
+      hash: md5
+      md5: 853bd20f40d21eb4bbb507fcabcffcd0
+      size: 9325165
+    - path: src/data/data_cleaning.py
+      hash: md5
+      md5: c0f7abdeff81f98ed9d898e4fda5a36b
+      size: 4189
+    outs:
+    - path: data/interim/cleaned_data.csv
+      hash: md5
+      md5: 25dd87a412d3d07c9ad098e5de9069f4
+      size: 5091736
+  data_preprocessing:
+    cmd: python src/data/data_preprocessing.py
+    deps:
+    - path: data/interim/cleaned_data.csv
+      hash: md5
+      md5: 25dd87a412d3d07c9ad098e5de9069f4
+      size: 5091736
+    - path: params.yaml
+      hash: md5
+      md5: eb50ae69dc2eedc31abb2c7072ebea6c
+      size: 385
+    - path: src/data/data_preprocessing.py
+      hash: md5
+      md5: a6ae2088d5316a214f13b4b4b44cda90
+      size: 3354
+    outs:
+    - path: data/processed
+      hash: md5
+      md5: 97192a839d83341b3bee47a0e720083a.dir
+      size: 1453130
+      nfiles: 4
+    - path: models/artifacts
+      hash: md5
+      md5: fc24fd21a64481e03ffe7a0165778a90.dir
+      size: 239035
+      nfiles: 2
