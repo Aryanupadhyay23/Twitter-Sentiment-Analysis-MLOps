@@ -97,13 +97,17 @@ stages:
       size: 1004
     - path: src/model/model_training.py
       hash: md5
-      md5: 19262ded0ff925efb32343550dc2fea4
-      size: 5405
+      md5: 699fad0989db7e752aa9a3cbd30fa167
+      size: 6376
     outs:
     - path: models/lgbm_model.pkl
       hash: md5
       md5: 750e20f1990f38a9bc37f00e66266979
       size: 7767989
+    - path: reports/experiment.json
+      hash: md5
+      md5: fae871abfe97e829140e8dbc7f412a8d
+      size: 344
   model_evaluation:
     cmd: python src/model/model_evaluation.py
     deps:
@@ -125,10 +129,14 @@ stages:
       hash: md5
       md5: fc9d4648ef081b37d5f4bd82be5f1365
       size: 1004
+    - path: reports/experiment.json
+      hash: md5
+      md5: f742376b654ef9a81fe67e53ae1e6edb
+      size: 406
     - path: src/model/model_evaluation.py
       hash: md5
-      md5: a6c6c5e8268b791388cfb203d3b5c203
-      size: 5176
+      md5: 97802a0a7ae4feaa9bba4820a2e04fdb
+      size: 5785
     outs:
     - path: reports/classification_report.json
       hash: md5
@@ -138,3 +146,14 @@ stages:
       hash: md5
       md5: f3db28330d262194875b686b0d8afe10
       size: 27259
+  model_registry:
+    cmd: python src/model/model_registry.py
+    deps:
+    - path: reports/experiment.json
+      hash: md5
+      md5: f742376b654ef9a81fe67e53ae1e6edb
+      size: 406
+    - path: src/model/model_registry.py
+      hash: md5
+      md5: ef504b985ff2469541a7b11736d4923f
+      size: 2393

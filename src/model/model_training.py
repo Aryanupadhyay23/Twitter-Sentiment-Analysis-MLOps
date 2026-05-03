@@ -4,6 +4,7 @@ import joblib
 import dagshub
 import mlflow
 import mlflow.sklearn
+import json
 import numpy as np
 
 from pathlib import Path
@@ -12,7 +13,7 @@ from lightgbm import LGBMClassifier
 from mlflow.models import infer_signature
 
 
-# DAGSHUB + MLFLOW SETUP
+# Initialize DagsHub MLflow
 
 dagshub.init(
     repo_owner="Aryanupadhyay23",
@@ -25,7 +26,7 @@ mlflow.set_tracking_uri(
 )
 
 
-# LOGGING
+# Configure logging
 
 logger = logging.getLogger("model_training")
 logger.setLevel(logging.DEBUG)
@@ -41,14 +42,14 @@ console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 
 
-# LOAD PARAMS
+# Load YAML parameters
 
 def load_params(path: Path):
     with path.open("r") as f:
         return yaml.safe_load(f)
 
 
-# FLATTEN PARAMS (for MLflow)
+# Flatten nested dictionary for MLflow logging
 
 def flatten_dict(d, parent_key="", sep="."):
     items = []
@@ -61,7 +62,7 @@ def flatten_dict(d, parent_key="", sep="."):
     return dict(items)
 
 
-# MAIN
+# Main training function
 
 def main():
     try:
@@ -82,7 +83,7 @@ def main():
         y_train = joblib.load(data_dir / "y_train.pkl")
         y_test = joblib.load(data_dir / "y_test.pkl")
 
-        # dtype fix
+        # Convert features to float32
         X_train = X_train.astype("float32")
         X_test = X_test.astype("float32")
 
@@ -92,6 +93,7 @@ def main():
 
         num_classes = len(label_encoder.classes_)
 
+        # Initialize LightGBM model
         model = LGBMClassifier(
             objective=lgbm_params["objective"],
             num_class=num_classes,
@@ -110,14 +112,14 @@ def main():
 
         mlflow.set_experiment(config["experiment_name"])
 
-        with mlflow.start_run(run_name="lgbm_training"):
+        with mlflow.start_run(run_name="lgbm_training") as run:
 
             logger.info("Training LightGBM model...")
             model.fit(X_train, y_train)
 
             y_pred = model.predict(X_test)
 
-            # Metrics
+            # Compute metrics
             acc = accuracy_score(y_test, y_pred)
             f1 = f1_score(y_test, y_pred, average="weighted")
             precision = precision_score(y_test, y_pred, average="weighted")
@@ -126,12 +128,10 @@ def main():
             logger.info(f"Accuracy: {acc}")
             logger.info(f"F1 Score: {f1}")
 
-            # -------- MLflow Logging -------- #
-
-            # 1. Log flattened parameters
+            # Log parameters
             mlflow.log_params(flatten_dict(lgbm_params))
 
-            # 2. Log additional metadata
+            # Log metadata
             mlflow.set_tags({
                 "model": "LightGBM",
                 "task": "multiclass_classification",
@@ -139,7 +139,7 @@ def main():
                 "num_classes": num_classes
             })
 
-            # 3. Log metrics
+            # Log metrics
             mlflow.log_metrics({
                 "accuracy": acc,
                 "f1_score": f1,
@@ -147,29 +147,50 @@ def main():
                 "recall": recall
             })
 
-            # 4. Save model locally
+            # Save model locally
             joblib.dump(model, model_path, compress=3)
 
-            # 5. Log artifacts
-            mlflow.log_artifact(str(model_path))
-
-            # log label encoder also
-            encoder_path = project_root / "models" / "artifacts" / "label_encoder.pkl"
-            mlflow.log_artifact(str(encoder_path))
-
-            # 6. Model signature
+            # Build signature
             sample_input = X_train[:5]
             signature = infer_signature(sample_input, model.predict(sample_input))
 
-            # 7. Log model with signature
-            mlflow.sklearn.log_model(
-                model,
+            # KEY FIX: artifact_path="model" creates a run-scoped artifact at
+            # runs:/<run_id>/model — exactly what model_registry.py needs.
+            # In MLflow 3.x, `name` creates a registered model directly but
+            # does NOT create the run artifact path, breaking register_model().
+            model_info = mlflow.sklearn.log_model(
+                sk_model=model,
                 artifact_path="model",
                 signature=signature,
                 input_example=sample_input
             )
 
-            logger.info("Model training + MLflow logging completed successfully.")
+            run_id = run.info.run_id
+            model_uri = model_info.model_uri  # runs:/<run_id>/model
+
+            logger.info(f"Run ID: {run_id}")
+            logger.info(f"Model URI: {model_uri}")
+
+            # Save experiment metadata — model_registry.py reads model_uri from here
+            experiment_data = {
+                "run_id": run_id,
+                "model_uri": model_uri,
+                "model_path": str(model_path),
+                "metrics": {
+                    "accuracy": acc,
+                    "f1_score": f1
+                }
+            }
+
+            experiment_path = project_root / "reports" / "experiment.json"
+            experiment_path.parent.mkdir(parents=True, exist_ok=True)
+
+            with open(experiment_path, "w") as f:
+                json.dump(experiment_data, f, indent=4)
+
+            mlflow.log_artifact(str(experiment_path))
+
+            logger.info("Model training completed successfully.")
 
     except Exception as e:
         logger.error("Model training failed: %s", e)

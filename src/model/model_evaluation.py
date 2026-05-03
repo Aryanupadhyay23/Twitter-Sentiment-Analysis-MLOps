@@ -5,7 +5,6 @@ import dagshub
 import mlflow
 import mlflow.sklearn
 import json
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -20,7 +19,7 @@ from sklearn.metrics import (
 )
 
 
-# DAGSHUB + MLFLOW SETUP
+# Initialize DagsHub MLflow
 
 dagshub.init(
     repo_owner="Aryanupadhyay23",
@@ -33,7 +32,7 @@ mlflow.set_tracking_uri(
 )
 
 
-# LOGGING
+# Configure logging
 
 logger = logging.getLogger("model_evaluation")
 logger.setLevel(logging.DEBUG)
@@ -49,14 +48,14 @@ console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 
 
-# LOAD PARAMS
+# Load YAML parameters
 
 def load_params(path: Path):
     with path.open("r") as f:
         return yaml.safe_load(f)
 
 
-# MAIN
+# Main evaluation function
 
 def main():
     try:
@@ -84,10 +83,13 @@ def main():
 
         class_names = list(label_encoder.classes_)
 
-        # dtype fix
+        # Convert features to float32
+
         X_test = X_test.astype("float32")
 
         mlflow.set_experiment(config["experiment_name"])
+
+        # Start MLflow run
 
         with mlflow.start_run(run_name="model_evaluation"):
 
@@ -95,20 +97,18 @@ def main():
 
             y_pred = model.predict(X_test)
 
-            # -------- Metrics -------- #
+            # Compute metrics
 
             acc = accuracy_score(y_test, y_pred)
-
             f1_weighted = f1_score(y_test, y_pred, average="weighted")
             f1_macro = f1_score(y_test, y_pred, average="macro")
-
             precision = precision_score(y_test, y_pred, average="weighted")
             recall = recall_score(y_test, y_pred, average="weighted")
 
             logger.info(f"Accuracy: {acc}")
-            logger.info(f"F1 (weighted): {f1_weighted}")
+            logger.info(f"F1 Score: {f1_weighted}")
 
-            # -------- Classification Report -------- #
+            # Generate classification report
 
             report = classification_report(
                 y_test,
@@ -121,7 +121,7 @@ def main():
             with open(report_path, "w") as f:
                 json.dump(report, f, indent=4)
 
-            # -------- Confusion Matrix -------- #
+            # Generate confusion matrix
 
             cm = confusion_matrix(y_test, y_pred)
 
@@ -142,9 +142,8 @@ def main():
             plt.savefig(cm_path)
             plt.close()
 
-            # -------- MLflow Logging -------- #
+            # Log metrics to MLflow
 
-            # Metrics
             mlflow.log_metrics({
                 "accuracy": acc,
                 "f1_weighted": f1_weighted,
@@ -153,14 +152,16 @@ def main():
                 "recall": recall
             })
 
-            # Per-class metrics (important for real-world debugging)
+            # Log per-class metrics
+
             for cls, metrics in report.items():
                 if isinstance(metrics, dict):
                     for metric_name, value in metrics.items():
                         if isinstance(value, (int, float)):
                             mlflow.log_metric(f"{cls}_{metric_name}", value)
 
-            # Tags
+            # Log metadata tags
+
             mlflow.set_tags({
                 "stage": "evaluation",
                 "model": "LightGBM",
@@ -168,13 +169,34 @@ def main():
                 "dataset": "twitter_sentiment"
             })
 
-            # Dataset info
+            # Log dataset info
+
             mlflow.log_param("test_samples", X_test.shape[0])
             mlflow.log_param("num_features", X_test.shape[1])
 
-            # Artifacts
+            # Log artifacts
+
             mlflow.log_artifact(str(report_path))
             mlflow.log_artifact(str(cm_path))
+
+            # Update experiment.json with evaluation run_id
+
+            run_id = mlflow.active_run().info.run_id
+
+            experiment_path = reports_dir / "experiment.json"
+
+            if experiment_path.exists():
+                with open(experiment_path, "r") as f:
+                    experiment_data = json.load(f)
+            else:
+                experiment_data = {}
+
+            experiment_data["evaluation_run_id"] = run_id
+
+            with open(experiment_path, "w") as f:
+                json.dump(experiment_data, f, indent=4)
+
+            mlflow.log_artifact(str(experiment_path))
 
             logger.info("Model evaluation completed successfully.")
 

@@ -43,7 +43,8 @@ stages:
       - params.yaml
     outs:
       - models/lgbm_model.pkl
-  
+      - reports/experiment.json   # ONLY HERE
+
   model_evaluation:
     cmd: python src/model/model_evaluation.py
     deps:
@@ -52,6 +53,13 @@ stages:
       - models/lgbm_model.pkl
       - models/artifacts
       - params.yaml
+      - reports/experiment.json 
     outs:
       - reports/classification_report.json
       - reports/confusion_matrix.png
+
+  model_registry:
+    cmd: python src/model/model_registry.py
+    deps:
+      - src/model/model_registry.py
+      - reports/experiment.json  
