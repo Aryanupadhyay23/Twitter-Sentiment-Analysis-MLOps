@@ -4,8 +4,8 @@ import joblib
 import dagshub
 import mlflow
 import mlflow.sklearn
-
 import json
+import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -67,6 +67,7 @@ def main():
 
         data_dir = project_root / "data" / "processed"
         model_path = project_root / config["save_model_path"]
+
         reports_dir = project_root / "reports"
         reports_dir.mkdir(parents=True, exist_ok=True)
 
@@ -83,29 +84,32 @@ def main():
 
         class_names = list(label_encoder.classes_)
 
-        # FIX dtype
+        # dtype fix
         X_test = X_test.astype("float32")
 
         mlflow.set_experiment(config["experiment_name"])
 
-        with mlflow.start_run():
+        with mlflow.start_run(run_name="model_evaluation"):
 
             logger.info("Running evaluation...")
 
             y_pred = model.predict(X_test)
 
-            # Core metrics
+            # -------- Metrics -------- #
+
             acc = accuracy_score(y_test, y_pred)
-            f1 = f1_score(y_test, y_pred, average="weighted")
+
+            f1_weighted = f1_score(y_test, y_pred, average="weighted")
+            f1_macro = f1_score(y_test, y_pred, average="macro")
+
             precision = precision_score(y_test, y_pred, average="weighted")
             recall = recall_score(y_test, y_pred, average="weighted")
 
             logger.info(f"Accuracy: {acc}")
-            logger.info(f"F1 Score: {f1}")
-            logger.info(f"Precision: {precision}")
-            logger.info(f"Recall: {recall}")
+            logger.info(f"F1 (weighted): {f1_weighted}")
 
-            # Classification report
+            # -------- Classification Report -------- #
+
             report = classification_report(
                 y_test,
                 y_pred,
@@ -117,7 +121,8 @@ def main():
             with open(report_path, "w") as f:
                 json.dump(report, f, indent=4)
 
-            # Confusion matrix
+            # -------- Confusion Matrix -------- #
+
             cm = confusion_matrix(y_test, y_pred)
 
             plt.figure(figsize=(8, 6))
@@ -137,12 +142,37 @@ def main():
             plt.savefig(cm_path)
             plt.close()
 
-            # MLflow logging
-            mlflow.log_metric("accuracy", acc)
-            mlflow.log_metric("f1_score", f1)
-            mlflow.log_metric("precision", precision)
-            mlflow.log_metric("recall", recall)
+            # -------- MLflow Logging -------- #
 
+            # Metrics
+            mlflow.log_metrics({
+                "accuracy": acc,
+                "f1_weighted": f1_weighted,
+                "f1_macro": f1_macro,
+                "precision": precision,
+                "recall": recall
+            })
+
+            # Per-class metrics (important for real-world debugging)
+            for cls, metrics in report.items():
+                if isinstance(metrics, dict):
+                    for metric_name, value in metrics.items():
+                        if isinstance(value, (int, float)):
+                            mlflow.log_metric(f"{cls}_{metric_name}", value)
+
+            # Tags
+            mlflow.set_tags({
+                "stage": "evaluation",
+                "model": "LightGBM",
+                "task": "multiclass_classification",
+                "dataset": "twitter_sentiment"
+            })
+
+            # Dataset info
+            mlflow.log_param("test_samples", X_test.shape[0])
+            mlflow.log_param("num_features", X_test.shape[1])
+
+            # Artifacts
             mlflow.log_artifact(str(report_path))
             mlflow.log_artifact(str(cm_path))
 

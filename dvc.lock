@@ -97,8 +97,8 @@ stages:
       size: 1004
     - path: src/model/model_training.py
       hash: md5
-      md5: b7437a41e0e33d603743a3d693359531
-      size: 3713
+      md5: 19262ded0ff925efb32343550dc2fea4
+      size: 5405
     outs:
     - path: models/lgbm_model.pkl
       hash: md5
@@ -127,8 +127,8 @@ stages:
       size: 1004
     - path: src/model/model_evaluation.py
       hash: md5
-      md5: c21eaedfa84d82b8c7ba01fa6680b664
-      size: 4183
+      md5: a6c6c5e8268b791388cfb203d3b5c203
+      size: 5176
     outs:
     - path: reports/classification_report.json
       hash: md5
