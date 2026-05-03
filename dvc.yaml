@@ -33,3 +33,25 @@ stages:
     outs:
       - data/processed
       - models/artifacts
+
+  model_training:
+    cmd: python src/model/model_training.py
+    deps:
+      - src/model/model_training.py
+      - data/processed
+      - models/artifacts
+      - params.yaml
+    outs:
+      - models/lgbm_model.pkl
+  
+  model_evaluation:
+    cmd: python src/model/model_evaluation.py
+    deps:
+      - src/model/model_evaluation.py
+      - data/processed
+      - models/lgbm_model.pkl
+      - models/artifacts
+      - params.yaml
+    outs:
+      - reports/classification_report.json
+      - reports/confusion_matrix.png

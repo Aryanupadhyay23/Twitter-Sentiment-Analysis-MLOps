@@ -16,3 +16,34 @@ data_preprocessing:
   test_size: 0.2
   max_features: 8000
   ngram_range: [1, 2]
+  dtype: float32
+
+model_training:
+  experiment_name: sentiment-lgbm-model
+  random_state: 42
+  save_model_path: models/lgbm_model.pkl
+
+  metrics:
+    primary: f1_score
+    secondary: accuracy
+
+  lightgbm:
+    objective: multiclass
+    n_estimators: 794
+    learning_rate: 0.19417245978419456
+    max_depth: 15
+    num_leaves: 179
+    min_child_samples: 5
+    subsample: 0.9766035386994655
+    colsample_bytree: 0.6215441014568336
+    class_weight: balanced
+    verbosity: -1
+
+
+model_evaluation:
+  reports_dir: reports
+  metrics:
+    - accuracy
+    - f1_score
+    - precision
+    - recall

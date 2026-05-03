@@ -5,8 +5,8 @@ stages:
     deps:
     - path: params.yaml
       hash: md5
-      md5: eb50ae69dc2eedc31abb2c7072ebea6c
-      size: 385
+      md5: fc9d4648ef081b37d5f4bd82be5f1365
+      size: 1004
     - path: src/data/data_ingestion.py
       hash: md5
       md5: cef56429eac017b49caabebb251807d9
@@ -25,8 +25,8 @@ stages:
       size: 9325165
     - path: params.yaml
       hash: md5
-      md5: eb50ae69dc2eedc31abb2c7072ebea6c
-      size: 385
+      md5: fc9d4648ef081b37d5f4bd82be5f1365
+      size: 1004
     - path: src/data/data_validation.py
       hash: md5
       md5: 043f338302b10d700ab1d775afc77d96
@@ -61,20 +61,80 @@ stages:
       size: 5091736
     - path: params.yaml
       hash: md5
-      md5: eb50ae69dc2eedc31abb2c7072ebea6c
-      size: 385
+      md5: fc9d4648ef081b37d5f4bd82be5f1365
+      size: 1004
     - path: src/data/data_preprocessing.py
       hash: md5
-      md5: a6ae2088d5316a214f13b4b4b44cda90
-      size: 3354
+      md5: d511e629901e8e88f245b911dbd6450e
+      size: 3384
     outs:
     - path: data/processed
       hash: md5
-      md5: 97192a839d83341b3bee47a0e720083a.dir
-      size: 1453130
+      md5: 829c277ff449952b5593d3a642e8bb5c.dir
+      size: 1429228
       nfiles: 4
     - path: models/artifacts
       hash: md5
-      md5: fc24fd21a64481e03ffe7a0165778a90.dir
-      size: 239035
+      md5: 319dc81274f4ebc0cf4ef597087c067f.dir
+      size: 239033
       nfiles: 2
+  model_training:
+    cmd: python src/model/model_training.py
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: 829c277ff449952b5593d3a642e8bb5c.dir
+      size: 1429228
+      nfiles: 4
+    - path: models/artifacts
+      hash: md5
+      md5: 319dc81274f4ebc0cf4ef597087c067f.dir
+      size: 239033
+      nfiles: 2
+    - path: params.yaml
+      hash: md5
+      md5: fc9d4648ef081b37d5f4bd82be5f1365
+      size: 1004
+    - path: src/model/model_training.py
+      hash: md5
+      md5: b7437a41e0e33d603743a3d693359531
+      size: 3713
+    outs:
+    - path: models/lgbm_model.pkl
+      hash: md5
+      md5: 750e20f1990f38a9bc37f00e66266979
+      size: 7767989
+  model_evaluation:
+    cmd: python src/model/model_evaluation.py
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: 829c277ff449952b5593d3a642e8bb5c.dir
+      size: 1429228
+      nfiles: 4
+    - path: models/artifacts
+      hash: md5
+      md5: 319dc81274f4ebc0cf4ef597087c067f.dir
+      size: 239033
+      nfiles: 2
+    - path: models/lgbm_model.pkl
+      hash: md5
+      md5: 750e20f1990f38a9bc37f00e66266979
+      size: 7767989
+    - path: params.yaml
+      hash: md5
+      md5: fc9d4648ef081b37d5f4bd82be5f1365
+      size: 1004
+    - path: src/model/model_evaluation.py
+      hash: md5
+      md5: c21eaedfa84d82b8c7ba01fa6680b664
+      size: 4183
+    outs:
+    - path: reports/classification_report.json
+      hash: md5
+      md5: 531e271b63e637d4eb4cb3898a58cbef
+      size: 922
+    - path: reports/confusion_matrix.png
+      hash: md5
+      md5: f3db28330d262194875b686b0d8afe10
+      size: 27259
