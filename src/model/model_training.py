@@ -154,10 +154,6 @@ def main():
             sample_input = X_train[:5]
             signature = infer_signature(sample_input, model.predict(sample_input))
 
-            # KEY FIX: artifact_path="model" creates a run-scoped artifact at
-            # runs:/<run_id>/model — exactly what model_registry.py needs.
-            # In MLflow 3.x, `name` creates a registered model directly but
-            # does NOT create the run artifact path, breaking register_model().
             model_info = mlflow.sklearn.log_model(
                 sk_model=model,
                 artifact_path="model",
