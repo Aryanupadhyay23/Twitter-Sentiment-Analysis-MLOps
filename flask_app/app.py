@@ -21,21 +21,20 @@ mlflow.set_tracking_uri(
 app = Flask(__name__)
 CORS(app)
 
-# Load global resources once at startup
+# Load resources
 stop_words = set(stopwords.words("english"))
 lemmatizer = WordNetLemmatizer()
 
 def preprocess_comment(comment: str) -> str:
-    comment = re.sub(r"http\S+", "", comment)       # Remove URLs
-    comment = re.sub(r"@\w+", "", comment)           # Remove mentions
-    comment = re.sub(r"#\w+", "", comment)           # Remove hashtags
-    comment = re.sub(r"[^\w\s]", "", comment)        # Remove punctuation
+    comment = re.sub(r"http\S+", "", comment)
+    comment = re.sub(r"@\w+", "", comment)
+    comment = re.sub(r"#\w+", "", comment)
+    comment = re.sub(r"[^\w\s]", "", comment)
     comment = comment.lower()
     tokens = comment.split()
     tokens = [lemmatizer.lemmatize(w) for w in tokens if w not in stop_words]
     return " ".join(tokens)
 
-# Load model using alias syntax (MLflow 3.x compatible)
 print("Loading model from MLflow registry...")
 model = mlflow.sklearn.load_model(
     "models:/sentiment-classification-model@staging"
@@ -46,28 +45,23 @@ label_encoder = joblib.load("models/artifacts/label_encoder.pkl")
 
 print("Model and artifacts loaded successfully!")
 
-
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
         data = request.get_json()
 
-        if not data or "comment" not in data:
-            return jsonify({"error": "No comment provided"}), 400
+        if not data or "comments" not in data:
+            return jsonify({"error": "No comments provided"}), 400
 
-        comments = data["comment"]
+        comments = data["comments"]
 
-        # Normalize to list (accept both single string and list)
         if isinstance(comments, str):
             comments = [comments]
 
         if not isinstance(comments, list):
-            return jsonify({"error": "comment must be a string or list of strings"}), 400
+            return jsonify({"error": "comments must be a list"}), 400
 
-        if not all(isinstance(c, str) for c in comments):
-            return jsonify({"error": "All comments must be strings"}), 400
-
-        # Preprocess each comment
+        # Preprocess
         processed = [preprocess_comment(c) for c in comments]
 
         # Vectorize
@@ -78,7 +72,6 @@ def predict():
         sentiments = label_encoder.inverse_transform(predictions)
 
         return jsonify({
-            "inputs": comments,
             "predictions": sentiments.tolist()
         })
 

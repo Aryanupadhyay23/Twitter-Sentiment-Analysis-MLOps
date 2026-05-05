@@ -52,3 +52,4 @@ htmlcov/
 # Documentation build
 docs/_build/
 data/processed/
+notes.txt
