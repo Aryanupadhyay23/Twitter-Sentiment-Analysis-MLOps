@@ -8,8 +8,8 @@ myenv/
 env/
 .venv/
 
-# Data managed by DVC
-data/
+# Ignore only root data folder
+/data/
 
 # Model artifacts
 models/artifacts/
@@ -51,5 +51,5 @@ htmlcov/
 
 # Documentation build
 docs/_build/
-data/processed/
+
 notes.txt
