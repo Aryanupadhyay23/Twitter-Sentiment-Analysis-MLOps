@@ -1,6 +1,3 @@
-# Local package
--e .
-
 # Core Libraries
 pandas
 numpy
