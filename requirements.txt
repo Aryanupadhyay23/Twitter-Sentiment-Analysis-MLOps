@@ -1,10 +1,46 @@
-# local package
+# Local package
 -e .
 
-# external requirements
-click
-Sphinx
-coverage
-awscli
-flake8
-python-dotenv>=0.5.1
+# Core Libraries
+pandas
+numpy
+scikit-learn
+scipy
+joblib
+
+# NLP
+nltk
+emoji
+regex
+
+# Visualization
+matplotlib
+seaborn
+
+# Gradient Boosting
+lightgbm
+xgboost
+
+# Config & Utilities
+PyYAML
+python-dotenv
+tqdm
+
+# AWS & Storage
+boto3
+s3fs
+
+# MLOps
+dvc
+dvc-s3
+mlflow
+
+# API / Deployment
+Flask
+flask-cors
+waitress
+
+# Optional Notebook Support
+jupyter
+notebook
+ipykernel
