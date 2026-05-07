@@ -19,6 +19,12 @@ from sklearn.metrics import (
 )
 
 
+# Token-based authentication
+
+dagshub.auth.add_app_token(
+    os.getenv("MLFLOW_TRACKING_PASSWORD")
+)
+
 # Initialize DagsHub MLflow
 
 dagshub.init(

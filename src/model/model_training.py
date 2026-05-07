@@ -13,6 +13,12 @@ from lightgbm import LGBMClassifier
 from mlflow.models import infer_signature
 
 
+# Token-based authentication
+
+dagshub.auth.add_app_token(
+    os.getenv("MLFLOW_TRACKING_PASSWORD")
+)
+
 # Initialize DagsHub MLflow
 
 dagshub.init(
