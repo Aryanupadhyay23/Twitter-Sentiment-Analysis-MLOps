@@ -23,14 +23,14 @@ PyYAML
 python-dotenv
 tqdm
 
-# AWS & Storage
+# AWS
 boto3
-s3fs
 
 # MLOps
 dvc
 dvc-s3
 mlflow
+dagshub
 
 # API / Deployment
 Flask
