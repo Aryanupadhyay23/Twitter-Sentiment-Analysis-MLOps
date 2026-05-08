@@ -91,3 +91,11 @@ jobs:
           DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
           pytest scripts/model_signature_test.py
+
+      - name: Run model performance tests
+        env:
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+        run: |
+          pytest scripts/model_performance_test.py
+
+      

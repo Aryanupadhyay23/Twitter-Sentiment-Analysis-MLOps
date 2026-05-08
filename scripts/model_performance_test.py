@@ -1,7 +1,7 @@
 import os
-import pickle
 
 import dagshub
+import joblib
 import mlflow
 import mlflow.pyfunc
 import pandas as pd
@@ -15,14 +15,14 @@ from sklearn.metrics import (
 )
 
 
-# DagsHub Authentication
+# DagsHub authentication
 
 dagshub.auth.add_app_token(
     token=os.getenv("DAGSHUB_TOKEN")
 )
 
 
-# Initialize DagsHub Repository
+# Initialize DagsHub repository
 
 dagshub.init(
     repo_owner="Aryanupadhyay23",
@@ -31,14 +31,14 @@ dagshub.init(
 )
 
 
-# MLflow Tracking URI
+# MLflow tracking URI
 
 mlflow.set_tracking_uri(
     "https://dagshub.com/Aryanupadhyay23/Twitter-Sentiment-Analysis-MLOps.mlflow"
 )
 
 
-# Test Configuration
+# Test configuration
 
 MODEL_NAME = "sentiment-classification-model"
 
@@ -51,15 +51,18 @@ LABEL_ENCODER_PATH = "models/artifacts/label_encoder.pkl"
 TEST_DATA_PATH = "data/interim/cleaned_data.csv"
 
 
-# Performance Thresholds
+# Performance thresholds
 
 EXPECTED_ACCURACY = 0.75
+
 EXPECTED_PRECISION = 0.75
+
 EXPECTED_RECALL = 0.75
+
 EXPECTED_F1_SCORE = 0.75
 
 
-# Model Performance Test
+# Model performance test
 
 def test_model_performance():
     """
@@ -67,23 +70,26 @@ def test_model_performance():
     """
 
     try:
-        # Load Model
+
+        # Load model
 
         model_uri = f"models:/{MODEL_NAME}@{MODEL_ALIAS}"
 
         model = mlflow.pyfunc.load_model(model_uri)
 
-        # Load Vectorizer
+        # Load vectorizer
 
-        with open(VECTORIZER_PATH, "rb") as file:
-            vectorizer = pickle.load(file)
+        vectorizer = joblib.load(
+            VECTORIZER_PATH
+        )
 
-        # Load Label Encoder
+        # Load label encoder
 
-        with open(LABEL_ENCODER_PATH, "rb") as file:
-            label_encoder = pickle.load(file)
+        label_encoder = joblib.load(
+            LABEL_ENCODER_PATH
+        )
 
-        # Load Dataset
+        # Load dataset
 
         df = pd.read_csv(TEST_DATA_PATH)
 
@@ -91,19 +97,19 @@ def test_model_performance():
 
         X_test_raw = df["text"].fillna("")
 
-        # Encode Labels
+        # Encode labels
 
         y_test = label_encoder.transform(
             df["sentiment"]
         )
 
-        # Vectorize Input
+        # Vectorize input
 
         X_test_vectorized = vectorizer.transform(
             X_test_raw
         )
 
-        # Convert to DataFrame
+        # Convert to dataframe
 
         X_test_df = pd.DataFrame(
             X_test_vectorized.toarray(),
@@ -112,7 +118,9 @@ def test_model_performance():
 
         # Predictions
 
-        y_pred = model.predict(X_test_df)
+        y_pred = model.predict(
+            X_test_df
+        )
 
         # Metrics
 
@@ -160,7 +168,7 @@ def test_model_performance():
             f"F1 Score below threshold: {f1:.4f}"
         )
 
-        # Success Output
+        # Success output
 
         print(
             f"\nModel Performance Test Passed"
@@ -171,6 +179,7 @@ def test_model_performance():
         )
 
     except Exception as e:
+
         pytest.fail(
             f"Model performance test failed.\n"
             f"Error : {e}"
