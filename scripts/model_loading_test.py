@@ -36,7 +36,7 @@ mlflow.set_tracking_uri(
 @pytest.mark.parametrize(
     "model_name, stage",
     [
-        ("sentiment-classification-model", "Staging"),
+        ("sentiment-classification-model", "staging"),
     ],
 )
 def test_load_latest_staging_model(model_name, stage):
