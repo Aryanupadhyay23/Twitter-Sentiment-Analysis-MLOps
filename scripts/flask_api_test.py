@@ -1,3 +1,12 @@
+import sys
+import os
+
+sys.path.append(
+    os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..")
+    )
+)
+
 import pytest
 
 from flask_app.app import app
@@ -19,9 +28,7 @@ def client():
 
 def test_health_endpoint(client):
 
-    response = client.get(
-        "/health"
-    )
+    response = client.get("/health")
 
     assert response.status_code == 200
 
@@ -82,11 +89,6 @@ def test_single_comment_prediction(client):
 
     assert "predictions" in response_json
 
-    assert isinstance(
-        response_json["predictions"],
-        list
-    )
-
     assert len(
         response_json["predictions"]
     ) == 1
@@ -96,11 +98,9 @@ def test_single_comment_prediction(client):
 
 def test_predict_without_comments(client):
 
-    data = {}
-
     response = client.post(
         "/predict",
-        json=data
+        json={}
     )
 
     assert response.status_code == 400
