@@ -105,4 +105,17 @@ jobs:
         run: |
           python scripts/promote_model_to_production.py
 
+      - name: Start Flask App
+        env:
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+        run: |
+          nohup python flask_app/app.py &
+
+      - name: Run Flask API tests
+        env:
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+
+        run: |
+          pytest scripts/flask_api_test.py
+
       
