@@ -76,7 +76,7 @@ stages:
       nfiles: 4
     - path: models/artifacts
       hash: md5
-      md5: 24ff57b5e912ae07a04831b265beddac.dir
+      md5: 958856cea156a8a158571d8ca90c2ffa.dir
       size: 239033
       nfiles: 2
   model_training:
@@ -89,7 +89,7 @@ stages:
       nfiles: 4
     - path: models/artifacts
       hash: md5
-      md5: 24ff57b5e912ae07a04831b265beddac.dir
+      md5: 958856cea156a8a158571d8ca90c2ffa.dir
       size: 239033
       nfiles: 2
     - path: params.yaml
@@ -103,11 +103,11 @@ stages:
     outs:
     - path: models/lgbm_model.pkl
       hash: md5
-      md5: 9816b7680880d53dd6a304a048790877
-      size: 7767783
+      md5: 19d3428dbc61a4f51c8826ac0614d360
+      size: 7767770
     - path: reports/experiment.json
       hash: md5
-      md5: 502ac3e9e0b446259d80935f5eb9549e
+      md5: 4780cb754ccddd69349e173106937e32
       size: 344
   model_evaluation:
     cmd: python src/model/model_evaluation.py
@@ -119,20 +119,20 @@ stages:
       nfiles: 4
     - path: models/artifacts
       hash: md5
-      md5: 24ff57b5e912ae07a04831b265beddac.dir
+      md5: 958856cea156a8a158571d8ca90c2ffa.dir
       size: 239033
       nfiles: 2
     - path: models/lgbm_model.pkl
       hash: md5
-      md5: 9816b7680880d53dd6a304a048790877
-      size: 7767783
+      md5: 19d3428dbc61a4f51c8826ac0614d360
+      size: 7767770
     - path: params.yaml
       hash: md5
       md5: 7a58e04a6edbb52d79eaffdc13ec0d34
       size: 956
     - path: reports/experiment.json
       hash: md5
-      md5: 14fde356272f3931243f78ab895c9564
+      md5: 07d3f51338fd8c581ea3fadd6dbb8e36
       size: 405
     - path: src/model/model_evaluation.py
       hash: md5
@@ -152,7 +152,7 @@ stages:
     deps:
     - path: reports/experiment.json
       hash: md5
-      md5: 14fde356272f3931243f78ab895c9564
+      md5: 07d3f51338fd8c581ea3fadd6dbb8e36
       size: 405
     - path: src/model/model_registry.py
       hash: md5
