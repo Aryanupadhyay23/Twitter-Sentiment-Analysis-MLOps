@@ -31,56 +31,40 @@ mlflow.set_tracking_uri(
 )
 
 
-# Test Configuration
+# Test Model Loading
 
 @pytest.mark.parametrize(
-    "model_name, stage",
+    "model_name, alias",
     [
         ("sentiment-classification-model", "staging"),
     ],
 )
-def test_load_latest_staging_model(model_name, stage):
+def test_load_latest_model(model_name, alias):
     """
-    Test whether the latest staging model
-    can be successfully loaded from
-    DagsHub MLflow Model Registry.
+    Test loading model from MLflow Model Registry
+    using model alias.
     """
-
-    client = MlflowClient()
-
-    # Fetch latest model version from registry
-    latest_versions = client.get_latest_versions(
-        name=model_name,
-        stages=[stage]
-    )
-
-    assert len(latest_versions) > 0, (
-        f"No model found in '{stage}' stage "
-        f"for model '{model_name}'"
-    )
-
-    latest_version = latest_versions[0].version
 
     try:
-        # Model URI
-        model_uri = f"models:/{model_name}/{latest_version}"
+        # Model URI using alias
+        model_uri = f"models:/{model_name}@{alias}"
 
         # Load model
         model = mlflow.pyfunc.load_model(model_uri)
 
-        # Validate loading
-        assert model is not None, "Model loading failed"
+        # Validation
+        assert model is not None, "Failed to load model"
 
         print(
             f"\nSuccessfully loaded model:"
             f"\nModel Name : {model_name}"
-            f"\nStage      : {stage}"
-            f"\nVersion    : {latest_version}\n"
+            f"\nAlias      : {alias}\n"
         )
 
     except Exception as e:
         pytest.fail(
-            f"Failed to load model "
-            f"'{model_name}' from stage "
-            f"'{stage}'. Error: {e}"
+            f"Model loading failed.\n"
+            f"Model : {model_name}\n"
+            f"Alias : {alias}\n"
+            f"Error : {e}"
         )
