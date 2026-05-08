@@ -1,30 +1,38 @@
-import requests
 import pytest
 
+from flask_app.app import app
 
-# Base URL
 
-BASE_URL = "http://localhost:5000"
+# Flask test client
+
+@pytest.fixture
+def client():
+
+    app.testing = True
+
+    with app.test_client() as client:
+
+        yield client
 
 
 # Health endpoint test
 
-def test_health_endpoint():
+def test_health_endpoint(client):
 
-    response = requests.get(
-        f"{BASE_URL}/health"
+    response = client.get(
+        "/health"
     )
 
     assert response.status_code == 200
 
-    response_json = response.json()
+    response_json = response.get_json()
 
     assert response_json["status"] == "ok"
 
 
 # Predict endpoint test
 
-def test_predict_endpoint():
+def test_predict_endpoint(client):
 
     data = {
         "comments": [
@@ -34,14 +42,14 @@ def test_predict_endpoint():
         ]
     }
 
-    response = requests.post(
-        f"{BASE_URL}/predict",
+    response = client.post(
+        "/predict",
         json=data
     )
 
     assert response.status_code == 200
 
-    response_json = response.json()
+    response_json = response.get_json()
 
     assert "predictions" in response_json
 
@@ -57,20 +65,20 @@ def test_predict_endpoint():
 
 # Single comment prediction test
 
-def test_single_comment_prediction():
+def test_single_comment_prediction(client):
 
     data = {
         "comments": "This product is fantastic"
     }
 
-    response = requests.post(
-        f"{BASE_URL}/predict",
+    response = client.post(
+        "/predict",
         json=data
     )
 
     assert response.status_code == 200
 
-    response_json = response.json()
+    response_json = response.get_json()
 
     assert "predictions" in response_json
 
@@ -86,57 +94,57 @@ def test_single_comment_prediction():
 
 # Invalid request test
 
-def test_predict_without_comments():
+def test_predict_without_comments(client):
 
     data = {}
 
-    response = requests.post(
-        f"{BASE_URL}/predict",
+    response = client.post(
+        "/predict",
         json=data
     )
 
     assert response.status_code == 400
 
-    response_json = response.json()
+    response_json = response.get_json()
 
     assert "error" in response_json
 
 
 # Invalid datatype test
 
-def test_invalid_comment_datatype():
+def test_invalid_comment_datatype(client):
 
     data = {
         "comments": 12345
     }
 
-    response = requests.post(
-        f"{BASE_URL}/predict",
+    response = client.post(
+        "/predict",
         json=data
     )
 
     assert response.status_code == 400
 
-    response_json = response.json()
+    response_json = response.get_json()
 
     assert "error" in response_json
 
 
 # Empty list test
 
-def test_empty_comment_list():
+def test_empty_comment_list(client):
 
     data = {
         "comments": []
     }
 
-    response = requests.post(
-        f"{BASE_URL}/predict",
+    response = client.post(
+        "/predict",
         json=data
     )
 
     assert response.status_code == 400
 
-    response_json = response.json()
+    response_json = response.get_json()
 
     assert "error" in response_json
