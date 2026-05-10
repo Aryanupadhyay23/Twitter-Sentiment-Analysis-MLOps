@@ -1,8 +1,10 @@
 import re
+import os
 
 import dagshub
 import joblib
 import mlflow
+import lightgbm
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -10,7 +12,13 @@ from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
 
-# DagsHub + MLflow setup
+# Token-based authentication
+
+dagshub.auth.add_app_token(
+    os.getenv("DAGSHUB_TOKEN")
+)
+
+# Initialize DagsHub MLflow
 
 dagshub.init(
     repo_owner="Aryanupadhyay23",

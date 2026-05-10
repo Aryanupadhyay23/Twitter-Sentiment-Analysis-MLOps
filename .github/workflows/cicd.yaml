@@ -118,4 +118,26 @@ jobs:
         run: |
           pytest scripts/flask_api_test.py
 
+      - name: Login to AWS ECR
+        if: success()
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 125840290869.dkr.ecr.us-east-1.amazonaws.com
+
+      - name: Build Docker image
+        if: success()
+        run: |
+          docker build -t yt-chrome-plugin .
+
+      - name: Tag Docker image
+        if: success()
+        run: |
+          docker tag yt-chrome-plugin:latest 125840290869.dkr.ecr.us-east-1.amazonaws.com/yt-chrome-plugin:latest
+
+      - name: Push Docker image to AWS ECR
+        if: success()
+        run: |
+          docker push 125840290869.dkr.ecr.us-east-1.amazonaws.com/yt-chrome-plugin:latest
+
       
