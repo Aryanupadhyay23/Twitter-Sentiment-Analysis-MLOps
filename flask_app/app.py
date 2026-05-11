@@ -84,6 +84,14 @@ label_encoder = joblib.load(
 print("Model and artifacts loaded successfully!")
 
 
+@app.route("/")
+def home():
+
+    return jsonify({
+        "message": "Welcome to the Flask API"
+    })
+
+
 # Prediction endpoint
 
 @app.route("/predict", methods=["POST"])

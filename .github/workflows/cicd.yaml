@@ -140,4 +140,36 @@ jobs:
         run: |
           docker push 125840290869.dkr.ecr.us-east-1.amazonaws.com/yt-chrome-plugin:latest
 
-      
+      # Zip deployment files
+      - name: Zip files for deployment
+        if: success()
+        run: |
+          zip -r deployment.zip appspec.yml deploy/scripts/install_dependencies.sh deploy/scripts/start_docker.sh
+
+      # Upload deployment bundle to S3
+      - name: Upload ZIP to S3
+        if: success()
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+        run: |
+          aws s3 cp deployment.zip s3://yt-sentiment-classification-bucket/deployment.zip
+
+      # Deploy application using AWS CodeDeploy
+      - name: Deploy to AWS CodeDeploy
+        if: success()
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+        run: |
+          aws deploy create-deployment \
+            --application-name youtube_chrome_Plugin \
+            --deployment-group-name YTChromePluginDeploymentGroup \
+            --deployment-config-name CodeDeployDefault.OneAtATime \
+            --s3-location bucket=yt-sentiment-classification-bucket,key=deployment.zip,bundleType=zip \
+            --file-exists-behavior OVERWRITE \
+            --region us-east-1
+
+            
