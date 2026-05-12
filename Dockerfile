@@ -8,13 +8,18 @@ ENV NLTK_DATA=/usr/local/nltk_data
 # Set working directory
 WORKDIR /app
 
-# Install only required system dependency
+# Install required system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
+    gcc \
+    g++ \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first
 COPY requirements.txt .
+
+# Upgrade pip
+RUN pip install --upgrade pip
 
 # Install Python dependencies
 RUN pip install --no-cache-dir --default-timeout=1000 -r requirements.txt
@@ -25,7 +30,7 @@ RUN python -m nltk.downloader -d /usr/local/nltk_data \
     wordnet \
     omw-1.4
 
-# Copy Flask app
+# Copy Flask application
 COPY flask_app/ /app/
 
 # Create artifact directory
@@ -35,8 +40,8 @@ RUN mkdir -p /app/models/artifacts
 COPY models/artifacts/vectorizer.pkl /app/models/artifacts/
 COPY models/artifacts/label_encoder.pkl /app/models/artifacts/
 
-# Expose Flask port
+# Expose application port
 EXPOSE 5000
 
-# Run Flask app
-CMD ["python", "app.py"]
+# Run production server using Gunicorn
+CMD ["gunicorn", "--workers", "2", "--threads", "4", "--timeout", "120", "--bind", "0.0.0.0:5000", "app:app"]
