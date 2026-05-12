@@ -1,26 +1,26 @@
 FROM python:3.11-slim
 
+# Environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV NLTK_DATA=/usr/local/nltk_data
+
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
+# Install only required system dependency
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
-    gcc \
-    g++ \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first
 COPY requirements.txt .
 
-# Upgrade pip
-RUN pip install --upgrade pip
-
 # Install Python dependencies
-RUN pip install --default-timeout=1000 --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --default-timeout=1000 -r requirements.txt
 
 # Download required NLTK resources
-RUN python -m nltk.downloader \
+RUN python -m nltk.downloader -d /usr/local/nltk_data \
     stopwords \
     wordnet \
     omw-1.4
@@ -31,9 +31,9 @@ COPY flask_app/ /app/
 # Create artifact directory
 RUN mkdir -p /app/models/artifacts
 
-# Copy artifacts with SAME paths used in code
-COPY models/artifacts/vectorizer.pkl /app/models/artifacts/vectorizer.pkl
-COPY models/artifacts/label_encoder.pkl /app/models/artifacts/label_encoder.pkl
+# Copy model artifacts
+COPY models/artifacts/vectorizer.pkl /app/models/artifacts/
+COPY models/artifacts/label_encoder.pkl /app/models/artifacts/
 
 # Expose Flask port
 EXPOSE 5000
